@@ -42,51 +42,57 @@ This is a histogram showing the number of occurences of each classification. All
 
 At first I tried both normalizing and applying a grayscale to the images, however I didn't see any serious improvement from the normaliziation so in the end I only applied grayscale. Grayscale did however make a significant difference on the validation accuracy.
 
+Later I added methods to increase the size of the data set. I first found the image types that had half as many samples as that with the most and I added slightly translated and rotated images to this set until the distribution was more even. 
+Then to that set I quadrupled the size of the data set by again randomly rotating between -10 and 10 degrees, randomly translating by a few pixels and increasing and decreasing the brightness
+
 #### 2. Describe what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
 My final model
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x1 Grayscale image   				    | 
-| Convolution 3x3     	| 1x1 stride, valid padding, outputs 28x28x10 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 14x14x10 				|
-| Dropout				|												|
-| Convolution 3x3     	| 1x1 stride, valid padding, outputs 10x10x24 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 5x5x24   				|
-| Dropout				|												|
-| Flatten				| Output = 600									|
-| Connected				| Output = 240									|
-| RELU					|												|
-| Connected				| Output = 120									|
-| RELU					|												|
-| Output Layer			| Output = 43									|
-
+| Input         		    | 32x32x1 Grayscale image   				            | 
+| Convolution 3x3     	| 1x1 stride, valid padding, outputs 28x28x16 	|
+| RELU					        |											                        	|
+| Max pooling	         	| 2x2 stride,  outputs 14x14x16 				        |
+| Dropout				        |											                        	|
+| Convolution 3x3     	| 1x1 stride, valid padding, outputs 10x10x16 	|
+| RELU				        	|												                        |
+| Max pooling	      	  | 2x2 stride,  outputs 5x5x24   	        			|
+| Dropout				        |										                        		|
+| Flatten			        	| Output = 600								                	|
+| Connected		      		| Output = 240					                				|
+| RELU			         		|											                        	|
+| Dropout				        |										                        		|
+| Connected			      	| Output = 120							                		|
+| RELU			           	|						  				                         	|
+| Output Layer		    	| Output = 43							                  		|
+  
 
 #### 3. Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 
 Honestly I spent about half of the time on this project trying to get GPU support to work. Once I did do that I noticed the training time cut by a fourth or so which was very convenient. From playing around with the hyperparameters and comparing the performance I eventually settled on the following hyperparameters.
 
 LEARNING_RATE = 0.0002
-EPOCHS = 50
+EPOCHS = 30
 BATCH_SIZE = 128
-KEEP_PROB = 0.65
+KEEP_PROB = 0.6
 
-These seemed to provide a satisfactory result and my validation reached up to 0.95
+These seemed to provide a satisfactory result and my validation reached up to 0.975
 
 #### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
 My final model results were:
-* validation set accuracy of 0.951
-* test set accuracy of 0.933
+* training set accuracy of 0.986
+* validation set accuracy of 0.976
+* test set accuracy of 0.96
 
 I initially started out with the same architecture that we had used in the LeNet lab and decided to build off that. It was simaltaneously more convenient than starting from scratch and was also built for a similar problem. The main architecture changes that I implemented were including dropout which significantly increased the max validation I was able to achieve by I assume helping my network not to overfit or rely on a single feature too much. I also increased the number of nodes at all the layers in order to complensate for the fact that the LeNet we used was built to classify a smaller number of features, (only 10) as opposed to 43 so my intution told me that in order to be effective to do that the network would have to be enabled to have more information passing through it. 
 
+In my iterative process I did several things along the way to slowly increase accuracy, I recorded each change I made and the effect it had on the last five training and validation accuracies to be able to compare different changes and see thier affect. I changed the dropout rate, the learning rate, and some of the filter depths and and the number fully ndoes in fully 
 One of the parameters I adjusted that gave me significant boosts was decreasing the sigma for my weight initializion. I'm not exactly sure why this helped my network train faster, but it seems initializing the weights closer to 0 on average greatly helped it. 
 
-This project helped me get a better feel and intuition about tweaking architecture and parameters to get improved results and going through the iterative process of improving the network taught me a lot. 
+After doing these I went back to preprocessing and augmented my data eventually getting around 10x as much data to process. This made a big difference and is the main reason I was able to increase my validation accuracy from around 0.945 to 0.976. 
 
 ### Test a Model on New Images
 
@@ -109,13 +115,13 @@ The fifth wasn't quite as difficult as the third, but it has dirt on it, extra l
 
 Here are the results of the prediction:
 
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Slippery Road      	| Slippery Road  								| 
-| Stop     			    | Stop										    |
-| 30 km/h				| Go Straight or Right							|
-| Yield	      		    | Yield					 		        		|
-| Road Work			    | No Passing for Vehicles      					|
+| Image			            |     Prediction	              		| 
+|:---------------------:|:---------------------------------:| 
+| Slippery Road       	| Slippery Road  							    	| 
+| Stop     			        | Stop										          |
+| 30 km/h			        	| Go Straight or Right							|
+| Yield	      		      | Yield					 		        		    |
+| Road Work			        | No Passing for Vehicles      		|
 
 
 The model was able to correctly guess 5 of the 5 traffic signs initially, but after adding more difficult signs it only guessed 3 out of 5 giving it 60% instead of 100%. This shows that in testing a large amount of data including more difficult to guess data must be added to get an accurate idea of how well our classifier is performing. 
@@ -124,12 +130,12 @@ The model was able to correctly guess 5 of the 5 traffic signs initially, but af
 
 
 | Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| 1.00        			| Slippery Road   								| 
-| 0.999     			| Stop											|
-| 0.757					| Go Straight or Right							|
-| 1.00	      			| Yield						 		        	|
-| 0.903				    | No Passing for Vehicles      				|
+|:---------------------:|:---------------------------------:| 
+| 1.00        		    	| Slippery Road   						  		| 
+| 0.999     			      | Stop							        				|
+| 0.757					        | Go Straight or Right							|
+| 1.00	      			    | Yield						 		             	|
+| 0.903				          | No Passing for Vehicles      			|
 
 
 For the three images that it got correct the model was almost certain of it's accuracy. However for the two it got wrong it was surprisingly confident as well with 0.75 and 0.9 confidence levels showing it wasn't well trained for those type of difficult scenarios. 
